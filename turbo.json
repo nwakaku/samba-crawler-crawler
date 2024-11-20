@@ -1,0 +1,26 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "test/**/*.js"],
+      "outputs": ["dist/**", "lib/**", "target/release/**"],
+      "cache": false,
+      "env": ["NEAR_NETWORK", "DEFAULT_CRAWLER_API_URL", "REACT_APP_API_URL"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "release": {
+      "cache": false,
+      "env": [
+        "GITHUB_TOKEN",
+        "GIT_AUTHOR_NAME",
+        "GIT_AUTHOR_EMAIL",
+        "GIT_COMMITTER_NAME",
+        "GIT_COMMITTER_EMAIL"
+      ]
+    }
+  }
+}

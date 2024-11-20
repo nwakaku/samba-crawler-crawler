@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "commonjs",
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "lib": ["es2023", "esnext", "dom"]
+  }
+}
