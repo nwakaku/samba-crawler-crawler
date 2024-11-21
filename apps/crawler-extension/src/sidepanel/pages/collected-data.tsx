@@ -9,8 +9,9 @@ import {
   Space,
   TreeSelect,
   Typography,
+  message,
 } from 'antd'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ClonedContextNode } from '../../common/types'
 import { getNameFromId } from '../../contentscript/helpers'
@@ -19,6 +20,9 @@ import CodeIcon from '../components/CodeIcon'
 import { Layout } from '../components/layout'
 import { TreeTraverser } from '../components/tree-traverser'
 import ContentScript from '../content-script'
+import { DownloadOutlined } from '@ant-design/icons'
+import Background from '../../background'
+import { OfflineContent } from '../../background/services/offline-storage-service'
 
 type ContextTypeTree = {
   value: string
@@ -88,10 +92,47 @@ export const CollectedData: React.FC = () => {
       ContentScript.improveParserConfig(pc, html),
   })
 
+  const { data: currentTab } = useQuery({
+    queryKey: ['currentTab'],
+    queryFn: ContentScript.getCurrentTab,
+    refetchInterval: false,
+  })
+
   const contextTypesTree = useMemo(
     () => extractContextTypesTree(contextTree ? [contextTree] : []),
     [contextTree]
   )
+
+  // Add autoSave effect
+  useEffect(() => {
+    if (!contextTree || !parsers?.length || !currentTab?.url) return
+    
+    const autoSave = async () => {
+      try {
+        const content: OfflineContent = {
+          id: crypto.randomUUID(),
+          url: currentTab.url!, // Add non-null assertion since we check currentTab?.url in the guard clause
+          timestamp: Date.now(),
+          contextTree,
+          tags: [],
+          parserId: parsers[0].id
+        }
+        await Background.saveOfflineContent(content)
+        message.success('Content auto-saved successfully')
+      } catch (error) {
+        message.error('Failed to auto-save content')
+        console.error('Auto-save error:', error)
+      }
+    }
+
+    // Initial save when context tree and parsers are first available
+    autoSave()
+    
+    // Set up interval for periodic saves (every 5 minutes)
+    const interval = setInterval(autoSave, 5 * 60 * 1000)
+    
+    return () => clearInterval(interval)
+  }, [contextTree, parsers, currentTab?.url])
 
   if (!contextTree) {
     return (
@@ -224,6 +265,13 @@ export const CollectedData: React.FC = () => {
             />
           </Flex>
         </Space>
+        <Button 
+          icon={<DownloadOutlined />} 
+          onClick={() => navigate('/offline-content')}
+          style={{ marginBottom: 16 }}
+        >
+          View Saved Content
+        </Button>
       </Space>
     </AntdLayout>
   )

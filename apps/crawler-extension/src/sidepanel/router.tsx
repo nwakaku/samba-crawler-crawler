@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { CollectedData } from './pages/collected-data'
 import { Default } from './pages/default'
 import { NoParsers } from './pages/no-parsers'
@@ -7,9 +7,11 @@ import ContentScript from './content-script'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layout } from './components/layout'
 import { Button, Typography } from 'antd'
+import { OfflineContent } from './pages/offline-content'
 
 const NavigationWrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient()
+  const location = useLocation()
 
   useEffect(() => {
     const { unsubscribe } = ContentScript.onActiveTabChange(() => {
@@ -29,7 +31,7 @@ const NavigationWrapper = ({ children }: { children: React.ReactNode }) => {
     mutationFn: ContentScript.reloadCurrentTab,
   })
 
-  if (!isAlive) {
+  if (!isAlive && location.pathname !== '/offline-content') {
     return (
       <Layout>
         <Typography.Text style={{ textAlign: 'center' }}>
@@ -58,7 +60,15 @@ export const Router: React.FC = () => {
           }
         />
         <Route
-          path="collected-data"
+          path="/offline-content"
+          element={
+            <NavigationWrapper>
+              <OfflineContent />
+            </NavigationWrapper>
+          }
+        />
+        <Route
+          path="/collected-data"
           element={
             <NavigationWrapper>
               <CollectedData />
@@ -66,7 +76,7 @@ export const Router: React.FC = () => {
           }
         />
         <Route
-          path="no-parsers"
+          path="/no-parsers"
           element={
             <NavigationWrapper>
               <NoParsers />
