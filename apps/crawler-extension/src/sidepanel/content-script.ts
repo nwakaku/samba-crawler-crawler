@@ -126,6 +126,16 @@ async function openSettingsPage() {
   await browser.runtime.openOptionsPage()
 }
 
+async function chatWithContent(contentId: string, query: string): Promise<string> {
+  const currentTab = await getCurrentTab()
+  if (!currentTab?.id) throw new Error('No active tab')
+
+  return browser.tabs.sendMessage(currentTab.id, {
+    type: 'CHAT_WITH_CONTENT',
+    params: { contentId, query },
+  })
+}
+
 export default {
   getCurrentTab,
   getSuitableParserConfigs,
@@ -139,4 +149,5 @@ export default {
   reloadCurrentTab,
   saveLocalParserConfig,
   openSettingsPage,
+  chatWithContent,
 }

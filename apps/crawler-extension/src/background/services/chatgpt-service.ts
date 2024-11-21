@@ -9,13 +9,15 @@ import { getNameFromId } from '../helpers'
 
 const SAMBANOVA_API_URL = 'https://api.sambanova.ai/v1/chat/completions'
 
-async function makeRequest(messages: Array<{role: string, content: string}>) {
+export async function makeRequest(messages: Array<{role: string, content: string}>) {
   const apiKey = await getChatGptApiKey()
   
   if (!apiKey) {
     throw new Error('[AI Crawler] API key is not set')
   }
 
+  console.log('Making API request with messages:', messages)
+  
   const response = await fetch(SAMBANOVA_API_URL, {
     method: 'POST',
     headers: {
@@ -23,52 +25,19 @@ async function makeRequest(messages: Array<{role: string, content: string}>) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      stream: true,
+      stream: false,
       model: 'Meta-Llama-3.1-8B-Instruct',
       messages: messages
     })
   })
 
   if (!response.ok) {
+    console.error('API Error:', response.status, response.statusText)
     throw new Error(`API request failed: ${response.statusText}`)
   }
 
-  const reader = response.body?.getReader()
-  if (!reader) throw new Error('No response body')
-
-  let fullContent = ''
-  
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    
-    // Convert the Uint8Array to text
-    const chunk = new TextDecoder().decode(value)
-    const lines = chunk.split('\n').filter(line => line.trim() !== '')
-    
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const jsonStr = line.slice(6) // Remove 'data: ' prefix
-        try {
-          const jsonData = JSON.parse(jsonStr)
-          if (jsonData.choices?.[0]?.message?.content) {
-            fullContent = jsonData.choices[0].message.content
-          }
-        } catch (e) {
-          // Skip invalid JSON chunks
-          continue
-        }
-      }
-    }
-  }
-
-  return {
-    choices: [{
-      message: {
-        content: fullContent
-      }
-    }]
-  }
+  const data = await response.json()
+  return data
 }
 
 export async function generateParserConfigByUrl(url: string): Promise<ParserConfig | null> {

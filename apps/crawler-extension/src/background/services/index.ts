@@ -5,6 +5,7 @@ import * as LocalParserService from './local-parser-service'
 import * as ContextService from './context-service'
 import * as EconomyService from './economy-service'
 import * as MenuService from './menu-service'
+import * as ChatService from './chat-service'
 
 export default {
   ...WalletService,
@@ -14,4 +15,5 @@ export default {
   ...ContextService,
   ...EconomyService,
   ...MenuService,
+  chatWithContent: ChatService.chatWithContent,
 }

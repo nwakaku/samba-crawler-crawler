@@ -144,6 +144,15 @@ async function main() {
     }
   }
 
+  async function handleChatMessage(contentId: string, query: string): Promise<string> {
+    try {
+      return await Background.chatWithContent(contentId, query)
+    } catch (error) {
+      console.error('Chat error:', error)
+      throw error
+    }
+  }
+
   browser.runtime.onMessage.addListener((message: any) => {
     if (!message || !message.type) return
     if (message.type === 'PING') {
@@ -173,6 +182,8 @@ async function main() {
       return Promise.resolve(deleteParser(message.params))
     } else if (message.type === 'SAVE_LOCAL_PARSER_CONFIG') {
       return Promise.resolve(saveLocalParserConfig(message.params))
+    } else if (message.type === 'CHAT_WITH_CONTENT') {
+      return Promise.resolve(handleChatMessage(message.params.contentId, message.params.query))
     }
   })
 }
