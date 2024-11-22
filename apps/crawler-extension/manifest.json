@@ -1,24 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Mutable Web — AI Crawler",
+  "name": "Mutable Web — Samba Crawler",
   "version": "",
   "version_name": "",
   "description": "",
   "author": "",
-  "short_name": "AI Crawler",
+  "short_name": "Samba Crawler",
   "background": {
     "service_worker": "service-worker.js",
     "type": "module"
   },
   "minimum_chrome_version": "95",
   "icons": {
-    "128": "icons/icon128.png"
+    "128": "icons/icon.png"
   },
   "action": {
     "default_popup": "popup.html"
   },
   "side_panel": {
-    "default_title": "Mutable Web — AI Crawler",
+    "default_title": "Mutable Web — Samba Crawler",
     "default_path": "sidepanel.html"
   },
   "options_page": "options.html",

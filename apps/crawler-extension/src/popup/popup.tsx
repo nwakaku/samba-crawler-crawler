@@ -1,24 +1,15 @@
-import { ControlOutlined, LogoutOutlined, WifiOutlined } from '@ant-design/icons'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Avatar, Badge, Card, Flex, Layout, Space, Typography, Button } from 'antd'
+import { ControlOutlined } from '@ant-design/icons'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Card, Flex, Layout,Typography, Button } from 'antd'
 import React, { FC } from 'react'
 import browser from 'webextension-polyfill'
 import Background from '../common/background'
-import { networkConfigs } from '../common/networks'
 import { utils } from 'near-api-js'
 
 export const Popup: FC = () => {
-  const queryClient = useQueryClient()
 
-  const { data: networkId } = useQuery({
-    queryKey: ['networkId'],
-    queryFn: Background.getCurrentNetwork,
-  })
-
-  const { data: accounts } = useQuery({
-    queryKey: ['accounts'],
-    queryFn: Background.near_getAccounts,
-  })
+  const { Title, Text } = Typography;
+ 
 
   const { data: contextCount } = useQuery({
     queryKey: ['contextCount'],
@@ -39,17 +30,8 @@ export const Popup: FC = () => {
     refetchInterval: 1000,
   })
 
-  const [account] = accounts ?? []
 
-  const { mutate: connectWallet, isPending: isWalletConnecting } = useMutation({
-    mutationFn: Background.connectWallet,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
-  })
-
-  const { mutate: disconnectWallet, isPending: isWalletDisconnecting } = useMutation({
-    mutationFn: Background.disconnectWallet,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
-  })
+  
 
   const { mutate: claimTokens, isPending: isClaiming } = useMutation({
     mutationFn: Background.claimTokens,
@@ -62,72 +44,40 @@ export const Popup: FC = () => {
     window.close()
   }
 
-  const handleConnectButtonClick = () => {
-    connectWallet()
-  }
-
-  const handleLogoutButtonClick = () => {
-    disconnectWallet()
-  }
+  
 
   const handleClaimClick = () => {
     claimTokens()
   }
 
-  if (!networkId) return null
+  const titleColor = '#df5a16'
+
 
   return (
     <Layout style={{ width: 300, padding: 16 }}>
       <Flex gap="middle" vertical>
-        {account ? (
-          <Card size="small">
-            <Flex gap="small" justify="flex-start" align="center">
-              <Avatar
-                size={48}
-                src={`${networkConfigs[networkId].avatarUrl}/${account.accountId}`}
-              />
-              <Flex vertical>
-                <Typography.Text strong>{account.accountId}</Typography.Text>
-                <Space>
-                  <Badge status="success" />
-                  <Typography.Text>{networkId}</Typography.Text>
-                </Space>
-              </Flex>
-            </Flex>
-          </Card>
-        ) : (
-          <Card size="small">
-            <Flex gap="small" justify="space-between" align="center">
-              <Typography.Text strong>No wallet connected</Typography.Text>
-              <Button
-                type="primary"
-                onClick={handleConnectButtonClick}
-                loading={isWalletConnecting}
-              >
-                Connect
-              </Button>
-            </Flex>
-          </Card>
-        )}
+        <Title level={4} style={{ margin: 0, color: titleColor }}>
+          Samba Crawler
+        </Title>
+
         <Flex gap="small" justify="center">
           <Card size="small" style={{ flex: 1 }}>
             <Card.Meta title={contextCount?.toString()} description="Items parsed" />
           </Card>
           <Card size="small" style={{ flex: 1 }}>
             <Card.Meta
-              title={`${utils.format.formatNearAmount(potentialAmount)} NEAR`}
-              description="Expected"
+              title={`${utils.format.formatNearAmount(potentialAmount)} USD`}
+              description="Expected Price"
             />
           </Card>
         </Flex>
-
         <Card size="small" style={{ flex: 1 }}>
           {isClaimableAmountFetching ? (
             <Card.Meta title="Loading..." description="Available to claim" />
           ) : (
             <Flex gap="small" justify="space-between" align="center">
               <Card.Meta
-                title={`${utils.format.formatNearAmount(claimableAmount)} NEAR`}
+                title={`${utils.format.formatNearAmount(claimableAmount)} USD`}
                 description="Available to claim"
               />
               {claimableAmount !== '0' ? (
@@ -135,7 +85,7 @@ export const Popup: FC = () => {
                   type="primary"
                   onClick={handleClaimClick}
                   loading={isClaiming}
-                  disabled={!account}
+                  disabled
                 >
                   Claim
                 </Button>
@@ -147,19 +97,6 @@ export const Popup: FC = () => {
           <Button block icon={<ControlOutlined />} onClick={handleSidePanelButtonClick}>
             Open side panel
           </Button>
-          {/* <Button block icon={<WifiOutlined />}>
-            Allowed websites
-          </Button> */}
-          {account ? (
-            <Button
-              block
-              icon={<LogoutOutlined />}
-              onClick={handleLogoutButtonClick}
-              loading={isWalletDisconnecting}
-            >
-              Logout
-            </Button>
-          ) : null}
         </Flex>
       </Flex>
     </Layout>
