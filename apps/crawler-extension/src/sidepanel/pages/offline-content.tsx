@@ -9,7 +9,7 @@ import { ClonedContextNode } from '../../common/types'
 import { SearchResult } from '../../background/services/offline-storage-service'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ChatProvider } from '../contexts/ChatContext'
-import { ChatService } from '../components/ChatService'
+import { UnifiedChatService } from '../components/UnifiedChatService'
 
 interface OfflineContent {
   id: string
@@ -129,7 +129,7 @@ export const OfflineContent: React.FC = () => {
                         showIcon
                       />
                     }>
-                      <ChatService content={item} />
+                      <UnifiedChatService contents={offlineContent} />
                     </ErrorBoundary>
                   </Space>
                 </List.Item>

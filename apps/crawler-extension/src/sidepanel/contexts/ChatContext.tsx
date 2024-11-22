@@ -6,38 +6,26 @@ interface Message {
 }
 
 interface ChatContextType {
-  messages: Record<string, Message[]>  // contentId -> messages
-  addMessage: (contentId: string, message: Message) => void
-  getMessages: (contentId: string) => Message[]
-  clearMessages: (contentId: string) => void
+  messages: Message[]
+  addMessage: (message: Message) => void
+  clearMessages: () => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [messages, setMessages] = useState<Record<string, Message[]>>({})
+  const [messages, setMessages] = useState<Message[]>([])
 
-  const addMessage = (contentId: string, message: Message) => {
-    setMessages(prev => ({
-      ...prev,
-      [contentId]: [...(prev[contentId] || []), message]
-    }))
+  const addMessage = (message: Message) => {
+    setMessages(prev => [...prev, message])
   }
 
-  const getMessages = (contentId: string) => {
-    return messages[contentId] || []
-  }
-
-  const clearMessages = (contentId: string) => {
-    setMessages(prev => {
-      const newMessages = { ...prev }
-      delete newMessages[contentId]
-      return newMessages
-    })
+  const clearMessages = () => {
+    setMessages([])
   }
 
   return (
-    <ChatContext.Provider value={{ messages, addMessage, getMessages, clearMessages }}>
+    <ChatContext.Provider value={{ messages, addMessage, clearMessages }}>
       {children}
     </ChatContext.Provider>
   )
